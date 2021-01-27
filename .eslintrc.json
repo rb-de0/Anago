@@ -1,0 +1,37 @@
+{
+    "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:@typescript-eslint/eslint-recommended", "plugin:import/errors", "plugin:import/typescript"],
+    "plugins": ["@typescript-eslint", "import"],
+    "parser": "@typescript-eslint/parser",
+    "env": {
+        "node": true,
+        "es6": true
+    },
+    "parserOptions": {
+        "sourceType": "module",
+        "project": "./tsconfig.json"
+    },
+    "settings": {
+        "import/resolver": {
+            "node": {
+                "extensions": [".ts"]
+            },
+            "typescript": {}
+        }
+    },
+    "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+        "@typescript-eslint/no-inferrable-types": "off",
+        "@typescript-eslint/no-var-requires": "off",
+        "no-irregular-whitespace": "off",
+        "no-constant-condition": "off",
+        "import/no-unresolved": [
+            "error",
+            {
+                "commonjs": true
+            }
+        ],
+        "no-restricted-imports": ["error", { "patterns": ["./", "../"] }],
+        "import/order": ["error"]
+    }
+}

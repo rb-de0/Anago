@@ -1,0 +1,838 @@
+[
+    {
+        "name": "Agent",
+        "properties": [
+            {
+                "name": "name",
+                "description": "エージェントの名前",
+                "type": { "name": "string" }
+            },
+            {
+                "name": "description",
+                "description": "エージェントの説明",
+                "type": { "name": "string" }
+            },
+            {
+                "name": "broker",
+                "description": "オーダーの発注や取得を行うブローカー",
+                "type": { "name": "Broker", "isAnagoModel": true }
+            },
+            {
+                "name": "logger",
+                "description": "ロガー",
+                "type": { "name": "AgentLogger", "isAnagoModel": true }
+            },
+            {
+                "name": "parameters",
+                "description": "パラメータ",
+                "type": { "name": "any" }
+            },
+            {
+                "name": "graphPainter",
+                "description": "グラフの作成や描画を行う",
+                "type": { "name": "GraphPainter", "isAnagoModel": true, "optional": true }
+            }
+        ],
+        "functions": [
+            {
+                "name": "setup",
+                "description": "エージェントの初期設定をする",
+                "returnType": { "name": "void", "isPromise": true }
+            },
+            {
+                "name": "nextTick",
+                "description": "ティックを取得したタイミングで呼び出される",
+                "parameters": [
+                    {
+                        "name": "tick",
+                        "description": "取得されたティック",
+                        "type": { "name": "Tick", "isAnagoModel": true }
+                    }
+                ],
+                "returnType": { "name": "void", "isPromise": true }
+            }
+        ]
+    },
+    {
+        "name": "Broker",
+        "functions": [
+            {
+                "name": "order",
+                "description": "新規オーダーをリクエストする",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "description": "新規オーダーリクエスト",
+                        "type": { "name": "Order", "isAnagoModel": true }
+                    }
+                ],
+                "returnType": { "name": "OrderResult", "isPromise": true, "isAnagoModel": true }
+            },
+            {
+                "name": "modifyOrder",
+                "description": "オーダーを修正する",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "description": "修正対象のオーダー",
+                        "type": { "name": "Order", "isAnagoModel": true }
+                    },
+                    {
+                        "name": "modifyOrder",
+                        "description": "修正リクエスト",
+                        "type": { "name": "ModifyOrder", "isAnagoModel": true }
+                    }
+                ],
+                "returnType": { "name": "void", "isPromise": true }
+            },
+            {
+                "name": "cancelOrder",
+                "description": "オーダーをキャンセルする",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "description": "オーダーID",
+                        "type": { "name": "string" }
+                    }
+                ],
+                "returnType": { "name": "void", "isPromise": true }
+            },
+            {
+                "name": "modifyPosition",
+                "description": "ポジションを修正する",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "description": "ポジションID",
+                        "type": { "name": "string" }
+                    },
+                    {
+                        "name": "closingPolicy",
+                        "description": "ポジションクローズ条件",
+                        "type": { "name": "ClosingPolicy", "isAnagoModel": true }
+                    }
+                ],
+                "returnType": { "name": "void", "isPromise": true }
+            },
+            {
+                "name": "closePosition",
+                "description": "ポジションをクローズする",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "description": "ポジションID",
+                        "type": { "name": "string" }
+                    }
+                ],
+                "returnType": { "name": "void", "isPromise": true }
+            },
+            {
+                "name": "positions",
+                "description": "オープン済みポジションを全件取得する",
+                "parameters": [],
+                "returnType": { "name": "Position", "isPromise": true, "isArray": true }
+            },
+            {
+                "name": "orders",
+                "description": "オープン済みオーダーを全件取得する",
+                "parameters": [],
+                "returnType": { "name": "Order", "isPromise": true, "isArray": true }
+            },
+            {
+                "name": "fetchAccount",
+                "description": "アカウント情報を取得する",
+                "parameters": [],
+                "returnType": { "name": "AccountSummary", "isPromise": true }
+            }
+        ]
+    },
+    {
+        "name": "Order",
+        "properties": [
+            {
+                "name": "id",
+                "description": "オーダーID",
+                "type": { "name": "string" }
+            },
+            {
+                "name": "type",
+                "description": "オーダーの種別",
+                "type": { "name": "OrderType", "isAnagoModel": true },
+                "readonly": true
+            },
+            {
+                "name": "instrument",
+                "description": "通貨ペア",
+                "type": { "name": "string" },
+                "readonly": true
+            },
+            {
+                "name": "sellOrBuy",
+                "description": "買 or 売",
+                "type": { "name": "SellOrBuy", "isAnagoModel": true },
+                "readonly": true
+            },
+            {
+                "name": "units",
+                "description": "注文数量",
+                "type": { "name": "number" }
+            },
+            {
+                "name": "takeProfitOnFill",
+                "description": "TakeProfit条件",
+                "type": { "name": "TakeProfitDetails", "isAnagoModel": true, "optional": true }
+            },
+            {
+                "name": "stopLossOnFill",
+                "description": "StopLoss条件",
+                "type": { "name": "StopLossDetails", "isAnagoModel": true, "optional": true }
+            },
+            {
+                "name": "trailingStopLossOnFill",
+                "description": "トレールストップ条件",
+                "type": { "name": "TrailingStopLossDetails", "isAnagoModel": true, "optional": true }
+            }
+        ],
+        "functions": [
+            {
+                "name": "static market",
+                "description": "マーケットオーダーを作成する",
+                "parameters": [
+                    {
+                        "name": "instrument",
+                        "description": "通貨ペア",
+                        "type": { "name": "string" }
+                    },
+                    {
+                        "name": "sellOrBuy",
+                        "description": "買 or 売",
+                        "type": { "name": "SellOrBuy", "isAnagoModel": true }
+                    },
+                    {
+                        "name": "units",
+                        "description": "注文数量",
+                        "type": { "name": "number" }
+                    }
+                ],
+                "returnType": { "name": "Order", "isAnagoModel": true }
+            },
+            {
+                "name": "static stop",
+                "description": "ストップオーダーを作成する",
+                "parameters": [
+                    {
+                        "name": "instrument",
+                        "description": "通貨ペア",
+                        "type": { "name": "string" }
+                    },
+                    {
+                        "name": "sellOrBuy",
+                        "description": "買 or 売",
+                        "type": { "name": "SellOrBuy", "isAnagoModel": true }
+                    },
+                    {
+                        "name": "units",
+                        "description": "注文数量",
+                        "type": { "name": "number" }
+                    },
+                    {
+                        "name": "price",
+                        "description": "価格",
+                        "type": { "name": "number" }
+                    }
+                ],
+                "returnType": { "name": "Order", "isAnagoModel": true }
+            },
+            {
+                "name": "static limit",
+                "description": "リミットオーダーを作成する",
+                "parameters": [
+                    {
+                        "name": "instrument",
+                        "description": "通貨ペア",
+                        "type": { "name": "string" }
+                    },
+                    {
+                        "name": "sellOrBuy",
+                        "description": "買 or 売",
+                        "type": { "name": "SellOrBuy", "isAnagoModel": true }
+                    },
+                    {
+                        "name": "units",
+                        "description": "注文数量",
+                        "type": { "name": "number" }
+                    },
+                    {
+                        "name": "price",
+                        "description": "価格",
+                        "type": { "name": "number" }
+                    }
+                ],
+                "returnType": { "name": "Order", "isAnagoModel": true }
+            }
+        ]
+    },
+    {
+        "name": "OrderType",
+        "type": { "name": "string" },
+        "cases": [
+            { "name": "market", "description": "成行" },
+            { "name": "limit", "description": "指値" },
+            { "name": "stop", "description": "逆指値" },
+            { "name": "marketIfTouched", "description": "marketIfTouched" }
+        ]
+    },
+    {
+        "name": "SellOrBuy",
+        "type": { "name": "string" },
+        "cases": [
+            { "name": "Sell", "description": "売" },
+            { "name": "Buy", "description": "買" }
+        ]
+    },
+    {
+        "name": "TakeProfitDetails",
+        "properties": [
+            {
+                "name": "price",
+                "description": "価格",
+                "type": { "name": "number" }
+            }
+        ],
+        "functions": [
+            {
+                "name": "new TakeProfitDetails",
+                "description": "インスタンスを作成する",
+                "parameters": [
+                    {
+                        "name": "price",
+                        "description": "価格",
+                        "type": { "name": "number" }
+                    }
+                ],
+                "returnType": { "name": "TakeProfitDetails", "isAnagoModel": true }
+            }
+        ]
+    },
+    {
+        "name": "StopLossDetails",
+        "properties": [
+            {
+                "name": "price",
+                "description": "価格",
+                "type": { "name": "number" }
+            }
+        ],
+        "functions": [
+            {
+                "name": "new StopLossDetails",
+                "description": "インスタンスを作成する",
+                "parameters": [
+                    {
+                        "name": "price",
+                        "description": "価格",
+                        "type": { "name": "number" }
+                    }
+                ],
+                "returnType": { "name": "StopLossDetails", "isAnagoModel": true }
+            }
+        ]
+    },
+    {
+        "name": "TrailingStopLossDetails",
+        "properties": [
+            {
+                "name": "price",
+                "description": "価格",
+                "type": { "name": "number", "optional": true }
+            },
+            {
+                "name": "distance",
+                "description": "pips",
+                "type": { "name": "number", "optional": true }
+            }
+        ],
+        "functions": [
+            {
+                "name": "new TrailingStopLossDetails",
+                "description": "インスタンスを作成する",
+                "parameters": [
+                    {
+                        "name": "price",
+                        "description": "価格",
+                        "type": { "name": "number", "optional": true }
+                    },
+                    {
+                        "name": "distance",
+                        "description": "pips",
+                        "type": { "name": "number", "optional": true }
+                    }
+                ],
+                "returnType": { "name": "TrailingStopLossDetails", "isAnagoModel": true }
+            }
+        ]
+    },
+    {
+        "name": "OrderResult",
+        "properties": [
+            {
+                "name": "openedOrder",
+                "description": "オープンされたオーダー情報",
+                "type": { "name": "Order", "isAnagoModel": true, "optional": true },
+                "readonly": true
+            },
+            {
+                "name": "openedPosition",
+                "description": "オープンされたポジションの情報",
+                "type": { "name": "Position", "isAnagoModel": true, "optional": true },
+                "readonly": true
+            },
+            {
+                "name": "reducedPosition",
+                "description": "減らされたポジションの情報",
+                "type": { "name": "AffectedPosition", "isAnagoModel": true, "optional": true },
+                "readonly": true
+            },
+            {
+                "name": "closedPositions",
+                "description": "クローズされたポジションの情報",
+                "type": { "name": "AffectedPosition", "isAnagoModel": true, "isArray": true },
+                "readonly": true
+            }
+        ]
+    },
+    {
+        "name": "AffectedPosition",
+        "properties": [
+            {
+                "name": "id",
+                "description": "ポジションID",
+                "type": { "name": "string" },
+                "readonly": true
+            },
+            {
+                "name": "units",
+                "description": "取引個数",
+                "type": { "name": "number" },
+                "readonly": true
+            },
+            {
+                "name": "price",
+                "description": "価格",
+                "type": { "name": "number" },
+                "readonly": true
+            },
+            {
+                "name": "timestamp",
+                "description": "タイムスタンプ",
+                "type": { "name": "Date" },
+                "readonly": true
+            }
+        ]
+    },
+    {
+        "name": "ModifyOrder",
+        "properties": [
+            {
+                "name": "units",
+                "description": "取引個数",
+                "type": { "name": "number", "optional": true }
+            },
+            {
+                "name": "price",
+                "description": "価格",
+                "type": { "name": "number", "optional": true }
+            },
+            {
+                "name": "timeInForce",
+                "description": "timeInForce",
+                "type": { "name": "string", "optional": true }
+            },
+            {
+                "name": "gtdTime",
+                "description": "gtdTime",
+                "type": { "name": "Date", "optional": true }
+            },
+            {
+                "name": "takeProfitOnFill",
+                "description": "TakeProfit条件",
+                "type": { "name": "TakeProfitDetails", "optional": true, "isAnagoModel": true }
+            },
+            {
+                "name": "stopLossOnFill",
+                "description": "StopLoss条件",
+                "type": { "name": "StopLossDetails", "optional": true, "isAnagoModel": true }
+            },
+            {
+                "name": "trailingStopLossOnFill",
+                "description": "TrailingStop条件",
+                "type": { "name": "TrailingStopLossDetails", "optional": true, "isAnagoModel": true }
+            }
+        ],
+        "functions": [
+            {
+                "name": "new ModifyOrder",
+                "description": "インスタンスを作成する",
+                "parameters": [
+                    {
+                        "name": "units",
+                        "description": "取引個数",
+                        "type": { "name": "number", "optional": true }
+                    },
+                    {
+                        "name": "price",
+                        "description": "価格",
+                        "type": { "name": "number", "optional": true }
+                    },
+                    {
+                        "name": "timeInForce",
+                        "description": "timeInForce",
+                        "type": { "name": "string", "optional": true }
+                    },
+                    {
+                        "name": "gtdTime",
+                        "description": "gtdTime",
+                        "type": { "name": "Date", "optional": true }
+                    },
+                    {
+                        "name": "takeProfitOnFill",
+                        "description": "TakeProfit条件",
+                        "type": { "name": "TakeProfitDetails", "optional": true, "isAnagoModel": true }
+                    },
+                    {
+                        "name": "stopLossOnFill",
+                        "description": "StopLoss条件",
+                        "type": { "name": "StopLossDetails", "optional": true, "isAnagoModel": true }
+                    },
+                    {
+                        "name": "trailingStopLossOnFill",
+                        "description": "TrailingStop条件",
+                        "type": { "name": "TrailingStopLossDetails", "optional": true, "isAnagoModel": true }
+                    }
+                ],
+                "returnType": { "name": "ModifyOrder", "isAnagoModel": true }
+            }
+        ]
+    },
+    {
+        "name": "Tick",
+        "properties": [
+            {
+                "name": "values",
+                "description": "通貨ペア毎のティック情報",
+                "type": { "name": "TickValue", "isAnagoModel": true, "isArray": true },
+                "readonly": true
+            },
+            {
+                "name": "timestamp",
+                "description": "ティックのタイムスタンプ",
+                "type": { "name": "Date" },
+                "readonly": true
+            }
+        ],
+        "functions": [
+            {
+                "name": "get",
+                "description": "通貨ペアに対するティックの情報を取得する",
+                "parameters": [
+                    {
+                        "name": "instrument",
+                        "description": "通貨ペア",
+                        "type": { "name": "string" }
+                    }
+                ],
+                "returnType": { "name": "TickValue", "isAnagoModel": true, "optiona": true }
+            }
+        ]
+    },
+    {
+        "name": "TickValue",
+        "properties": [
+            {
+                "name": "instrument",
+                "description": "通貨ペア",
+                "type": { "name": "string" },
+                "readonly": true
+            },
+            {
+                "name": "bid",
+                "description": "売値",
+                "type": { "name": "number" },
+                "readonly": true
+            },
+            {
+                "name": "ask",
+                "description": "買値",
+                "type": { "name": "number" },
+                "readonly": true
+            }
+        ],
+        "functions": [
+            {
+                "name": "mid",
+                "description": "bidとaskの平均値を返す",
+                "parameters": [],
+                "returnType": { "name": "number" }
+            }
+        ]
+    },
+    {
+        "name": "Position",
+        "properties": [
+            {
+                "name": "id",
+                "description": "ポジションID",
+                "type": { "name": "string" }
+            },
+            {
+                "name": "instrument",
+                "description": "通貨ペア",
+                "type": { "name": "string" },
+                "readonly": true
+            },
+            {
+                "name": "sellOrBuy",
+                "description": "売 or 買",
+                "type": { "name": "SellOrBuy", "isAnagoModel": true },
+                "readonly": true
+            },
+            {
+                "name": "entryPrice",
+                "description": "エントリー価格",
+                "type": { "name": "number" },
+                "readonly": true
+            },
+            {
+                "name": "entriedAt",
+                "description": "エントリー日時",
+                "type": { "name": "Date" },
+                "readonly": true
+            },
+            {
+                "name": "units",
+                "description": "取引個数",
+                "type": { "name": "number" }
+            },
+            {
+                "name": "price",
+                "description": "現在価格",
+                "type": { "name": "number", "optional": true }
+            },
+            {
+                "name": "profitOrLoss",
+                "description": "損益",
+                "type": { "name": "number", "optional": true }
+            },
+            {
+                "name": "closingPolicy",
+                "description": "クローズ条件",
+                "type": { "name": "ClosingPolicy", "isAnagoModel": true, "optional": true }
+            }
+        ]
+    },
+    {
+        "name": "ClosingPolicy",
+        "properties": [
+            {
+                "name": "takeProfitPrice",
+                "description": "TakeProfitDetails.price",
+                "type": { "name": "number", "optional": true }
+            },
+            {
+                "name": "stopLossPrice",
+                "description": "StopLossDetails.price",
+                "type": { "name": "number", "optional": true }
+            },
+            {
+                "name": "trailingStopDistance",
+                "description": "TrailingStopLossDetail.distance",
+                "type": { "name": "number", "optional": true }
+            },
+            {
+                "name": "trailingStopPrice",
+                "description": "TrailingStopLossDetails.price",
+                "type": { "name": "number", "optional": true }
+            }
+        ],
+        "functions": [
+            {
+                "name": "new ClosingPolicy",
+                "description": "インスタンスを作成する",
+                "parameters": [],
+                "returnType": { "name": "ClosingPolicy", "isAnagoModel": true }
+            }
+        ]
+    },
+    {
+        "name": "Graph",
+        "properties": [
+            {
+                "name": "type",
+                "description": "グラフの種別",
+                "type": { "name": "GraphType", "isAnagoModel": true }
+            },
+            {
+                "name": "name",
+                "description": "グラフ名前",
+                "type": { "name": "string" }
+            },
+            {
+                "name": "data",
+                "description": "グラフデータ",
+                "type": { "name": "GraphData", "isAnagoModel": true, "isArray": true }
+            },
+            {
+                "name": "maxY",
+                "description": "Y軸上限値",
+                "type": { "name": "number", "optional": true }
+            },
+            {
+                "name": "minY",
+                "description": "Y軸下限値",
+                "type": { "name": "number", "optional": true }
+            }
+        ]
+    },
+    {
+        "name": "GraphType",
+        "type": { "name": "string" },
+        "cases": [
+            { "name": "rate", "description": "rateグラフ, キャンドルと同じ領域に描画される" },
+            { "name": "line", "description": "lineグラフ, キャンドルとは別の領域に描画される" }
+        ]
+    },
+    {
+        "name": "GraphData",
+        "properties": [
+            {
+                "name": "timestamp",
+                "description": "タイムスタンプ",
+                "type": { "name": "Date" }
+            },
+            {
+                "name": "value",
+                "description": "値",
+                "type": { "name": "number" }
+            }
+        ],
+        "functions": [
+            {
+                "name": "new GraphData",
+                "description": "インスタンスを作成する",
+                "parameters": [
+                    {
+                        "name": "timestamp",
+                        "description": "タイムスタンプ",
+                        "type": { "name": "Date" }
+                    },
+                    {
+                        "name": "value",
+                        "description": "値",
+                        "type": { "name": "number" }
+                    }
+                ],
+                "returnType": { "name": "GraphData", "isAnagoModel": true }
+            }
+        ]
+    },
+    {
+        "name": "GraphPainter",
+        "functions": [
+            {
+                "name": "createGraph",
+                "description": "グラフを作成する",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "description": "グラフ種別",
+                        "type": { "name": "GraphType", "isAnagoModel": true }
+                    },
+                    {
+                        "name": "name",
+                        "description": "グラフの名前",
+                        "type": { "name": "string" }
+                    },
+                    {
+                        "name": "maxY",
+                        "description": "Y軸上限値, typeがlineの場合のみ指定する必要がある",
+                        "type": { "name": "number", "optional": true }
+                    },
+                    {
+                        "name": "minY",
+                        "description": "Y軸下限値, typeがlineの場合のみ指定する必要がある",
+                        "type": { "name": "number", "optional": true }
+                    }
+                ],
+                "returnType": { "name": "Graph", "isAnagoModel": true, "isPromise": true, "optional": true }
+            },
+            {
+                "name": "pushGraphData",
+                "description": "グラフの描画データを追加する",
+                "parameters": [
+                    {
+                        "name": "graph",
+                        "description": "追加対象のグラフ",
+                        "type": { "name": "Graph", "isAnagoModel": true }
+                    },
+                    {
+                        "name": "data",
+                        "description": "データ",
+                        "type": { "name": "GraphData", "isAnagoModel": true }
+                    }
+                ],
+                "returnType": { "name": "void", "isPromise": true }
+            }
+        ]
+    },
+    {
+        "name": "AgentLogger",
+        "functions": [
+            {
+                "name": "info",
+                "description": "ログを出力する",
+                "parameters": [
+                    {
+                        "name": "message",
+                        "description": "メッセージ",
+                        "type": { "name": "string" }
+                    }
+                ],
+                "returnType": { "name": "void", "isPromise": true }
+            },
+            {
+                "name": "debug",
+                "description": "ログを出力する",
+                "parameters": [
+                    {
+                        "name": "message",
+                        "description": "メッセージ",
+                        "type": { "name": "string" }
+                    }
+                ],
+                "returnType": { "name": "void", "isPromise": true }
+            },
+            {
+                "name": "error",
+                "description": "ログを出力する",
+                "parameters": [
+                    {
+                        "name": "message",
+                        "description": "メッセージ",
+                        "type": { "name": "string" }
+                    }
+                ],
+                "returnType": { "name": "void", "isPromise": true }
+            }
+        ]
+    },
+    {
+        "name": "AccountSummary",
+        "properties": [
+            {
+                "name": "balance",
+                "description": "残高",
+                "type": { "name": "number" }
+            }
+        ]
+    }
+]

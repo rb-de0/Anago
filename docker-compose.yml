@@ -1,0 +1,27 @@
+version: '3'
+volumes:
+  tmp:
+services:
+  web:
+    container_name: anago
+    image: node:12.18-alpine
+    links:
+      - mongo
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/app
+      - tmp:/app/node_modules
+    working_dir: '/app'
+    environment:
+      - NODE_ENV=production
+      - ANAGO_ORIGIN=${ANAGO_ORIGIN}
+    command: sh -c 'yarn install && yarn create_user ${ANAGO_USER} ${ANAGO_PASSWORD} ${OANDA_API_KEY} ${OANDA_API_TYPE} && yarn start'
+
+  mongo:
+    container_name: anago_mongo
+    image: mongo:4.0.10
+    ports:
+      - '27018:27017'
+    volumes:
+      - ${MONGO_DATA_DIR:-.mongo}:/data/db

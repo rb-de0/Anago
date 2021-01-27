@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "**/data/agents/user/*.ts": "plaintext",
+        "**/data/agents/*.ts": "plaintext"
+    },
+    "[typescript]": {
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    }
+}
